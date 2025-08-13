@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Study Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📘 Study Tracker</h1>
+
+  <form id="trackerForm">
+    <input type="date" id="date" required>
+    <input type="text" id="physics" placeholder="Physics Chapter" required>
+    <input type="number" id="easy" placeholder="Easy Qs" min="0">
+    <input type="number" id="moderate" placeholder="Moderate Qs" min="0">
+    <input type="number" id="tough" placeholder="Tough Qs" min="0">
+    <input type="text" id="math" placeholder="Math Chapter" required>
+    <input type="number" id="mathQs" placeholder="Math Qs Solved" min="0">
+    <input type="number" id="target" placeholder="Daily Target" min="0">
+    <button type="submit">Add Entry</button>
+  </form>
+
+  <table id="logTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Physics Chapter</th>
+        <th>Easy</th>
+        <th>Moderate</th>
+        <th>Tough</th>
+        <th>Math Chapter</th>
+        <th>Math Qs</th>
+        <th>Target</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+</html>

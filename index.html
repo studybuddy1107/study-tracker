@@ -4,19 +4,119 @@
   <meta charset="UTF-8">
   <title>Study Tracker</title>
   <style>
-    table, th, td {
-      border: 1px solid black;
-      border-collapse: collapse;
-      padding: 5px;
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
     }
-    .todo { background-color: #f0f0f0; }
-    .inprogress { background-color: #fff3cd; }
-    .done { background-color: #d4edda; }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 800px;
+      margin: 0 auto 20px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    form input, form button {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    form button {
+      grid-column: span 2;
+      background-color: #007BFF;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+
+    form button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #eee;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    .todo {
+      background-color: #fff0f0;
+    }
+
+    .inprogress {
+      background-color: #fffce0;
+    }
+
+    .done {
+      background-color: #e3fce3;
+    }
+
+    .action-btn {
+      padding: 6px 10px;
+      margin: 2px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #ffc107;
+      color: #000;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+
+      form button {
+        grid-column: span 1;
+      }
+
+      table {
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
 
-<h2>Study Tracker</h2>
+<h2>📘 Study Tracker</h2>
+
 <form id="trackerForm">
   <input type="date" id="date" required>
   <input type="text" id="physics" placeholder="Physics Topic">
@@ -28,8 +128,6 @@
   <input type="number" id="target" placeholder="Target">
   <button type="submit" id="submitBtn">Add Entry</button>
 </form>
-
-<br>
 
 <table id="logTable">
   <thead>
@@ -68,8 +166,7 @@
   }
 
   function loadEntries() {
-    const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
-    return entries;
+    return JSON.parse(localStorage.getItem('studyLog')) || [];
   }
 
   function renderTable() {
@@ -94,10 +191,11 @@
       <td>${data.target}</td>
       <td>${status}</td>
       <td>
-        <button class="edit-btn" data-index="${index}">Edit</button>
-        <button class="delete-btn" data-index="${index}">Delete</button>
+        <button class="action-btn edit-btn" data-index="${index}">Edit</button>
+        <button class="action-btn delete-btn" data-index="${index}">Delete</button>
       </td>
     `;
+
     tableBody.appendChild(row);
   }
 
@@ -165,10 +263,11 @@
     }
   });
 
-  // Initial table load
+  // Initial load
   renderTable();
 </script>
 
 </body>
 </html>
+
 

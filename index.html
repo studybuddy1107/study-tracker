@@ -3,42 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <title>Study Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 5px;
+    }
+    .todo { background-color: #f0f0f0; }
+    .inprogress { background-color: #fff3cd; }
+    .done { background-color: #d4edda; }
+  </style>
 </head>
 <body>
-  <h1>📘 Study Tracker</h1>
 
-  <form id="trackerForm">
-    <input type="date" id="date" required>
-    <input type="text" id="physics" placeholder="Physics Chapter" required>
-    <input type="number" id="easy" placeholder="Easy Qs" min="0">
-    <input type="number" id="moderate" placeholder="Moderate Qs" min="0">
-    <input type="number" id="tough" placeholder="Tough Qs" min="0">
-    <input type="text" id="math" placeholder="Math Chapter" required>
-    <input type="number" id="mathQs" placeholder="Math Qs Solved" min="0">
-    <input type="number" id="target" placeholder="Daily Target" min="0">
-    <button type="submit">Add Entry</button>
-  </form>
+<h2>Study Tracker</h2>
+<form id="trackerForm">
+  <input type="date" id="date" required>
+  <input type="text" id="physics" placeholder="Physics Topic">
+  <input type="number" id="easy" placeholder="Easy Qs">
+  <input type="number" id="moderate" placeholder="Moderate Qs">
+  <input type="number" id="tough" placeholder="Tough Qs">
+  <input type="text" id="math" placeholder="Math Topic">
+  <input type="number" id="mathQs" placeholder="Math Qs">
+  <input type="number" id="target" placeholder="Target">
+  <button type="submit" id="submitBtn">Add Entry</button>
+</form>
 
-  <table id="logTable">
-    <thead>
-  <tr>
-    <th>Date</th>
-    <th>Physics</th>
-    <th>Easy</th>
-    <th>Moderate</th>
-    <th>Tough</th>
-    <th>Math</th>
-    <th>Math Qs</th>
-    <th>Target</th>
-    <th>Status</th>
-    <th>Actions</th> <!-- Make sure this exists -->
-  </tr>
-</thead>
+<br>
 
-    <tbody></tbody>
-  </table>
+<table id="logTable">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Physics</th>
+      <th>Easy</th>
+      <th>Moderate</th>
+      <th>Tough</th>
+      <th>Math</th>
+      <th>Math Qs</th>
+      <th>Target</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-  <script src="script.js"></script>
+<script>
+  const form = document.getElementById('trackerForm');
+  const tableBody = document.querySelector('#logTable tbody');
+  const submitBtn = document.getElementById('submitBtn');
+
+  let editIndex = null;
+
+  function getStatus(e, m, t, target) {
+    const total = e + m + t;
+    if (total === 0 && target > 0) return "To Do";
+    if (total < target) return "In Progress";
+    return "Done";
+  }
+
+  function saveEntries(entries) {
+    localStorage.setItem('studyLog', JSON.stringify(entries));
+  }
+
+  function loadEntries() {
+    const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
+    return entries;
+  }
+
+  function renderTable() {
+    tableBody.innerHTML = '';
+    const entries = loadEntries();
+    entries.forEach((entry, index) => addEntryToTable(entry, index));
+  }
+
+  function addEntryToTable(data, index) {
+    const row = document.createElement('tr');
+    const status = getStatus(data.easy, data.moderate, data.tough, data.target);
+    row.classList.add(status.toLowerCase().replace(' ', ''));
+
+    row.innerHTML = `
+      <td>${data.date}</td>
+      <td>${data.physics}</td>
+      <td>${data.easy}</td>
+      <td>${data.moderate}</td>
+      <td>${data.tough}</td>
+      <td>${data.math}</td>
+      <td>${data.mathQs}</td>
+      <td>${data.target}</td>
+      <td>${status}</td>
+      <td>
+        <button class="edit-btn" data-index="${index}">Edit</button>
+        <button class="delete-btn" data-index="${index}">Delete</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const data = {
+      date: document.getElementById('date').value,
+      physics: document.getElementById('physics').value,
+      easy: parseInt(document.getElementById('easy').value || 0),
+      moderate: parseInt(document.getElementById('moderate').value || 0),
+      tough: parseInt(document.getElementById('tough').value || 0),
+      math: document.getElementById('math').value,
+      mathQs: parseInt(document.getElementById('mathQs').value || 0),
+      target: parseInt(document.getElementById('target').value || 0)
+    };
+
+    const entries = loadEntries();
+
+    if (editIndex !== null) {
+      entries[editIndex] = data;
+      editIndex = null;
+      submitBtn.textContent = "Add Entry";
+    } else {
+      entries.push(data);
+    }
+
+    saveEntries(entries);
+    renderTable();
+    form.reset();
+  });
+
+  tableBody.addEventListener('click', function(e) {
+    const entries = loadEntries();
+
+    if (e.target.classList.contains('edit-btn')) {
+      const index = parseInt(e.target.dataset.index);
+      const entry = entries[index];
+
+      document.getElementById('date').value = entry.date;
+      document.getElementById('physics').value = entry.physics;
+      document.getElementById('easy').value = entry.easy;
+      document.getElementById('moderate').value = entry.moderate;
+      document.getElementById('tough').value = entry.tough;
+      document.getElementById('math').value = entry.math;
+      document.getElementById('mathQs').value = entry.mathQs;
+      document.getElementById('target').value = entry.target;
+
+      editIndex = index;
+      submitBtn.textContent = "Update Entry";
+    }
+
+    if (e.target.classList.contains('delete-btn')) {
+      const index = parseInt(e.target.dataset.index);
+      if (confirm("Are you sure you want to delete this entry?")) {
+        entries.splice(index, 1);
+        saveEntries(entries);
+        renderTable();
+        form.reset();
+        submitBtn.textContent = "Add Entry";
+        if (editIndex === index) {
+          editIndex = null;
+        }
+      }
+    }
+  });
+
+  // Initial table load
+  renderTable();
+</script>
+
 </body>
 </html>
+

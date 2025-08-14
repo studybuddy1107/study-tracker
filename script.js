@@ -1,5 +1,3 @@
-// JS PART
-
 const form = document.getElementById('trackerForm');
 const tableBody = document.querySelector('#logTable tbody');
 const submitBtn = document.getElementById('submitBtn');
@@ -30,6 +28,7 @@ function addEntryToTable(data, index) {
     <td>${status}</td>
     <td>
       <button class="edit-btn" data-index="${index}">Edit</button>
+      <button class="delete-btn" data-index="${index}">Delete</button>
     </td>
   `;
 
@@ -40,10 +39,6 @@ function renderTable() {
   tableBody.innerHTML = '';
   const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
   entries.forEach((entry, index) => addEntryToTable(entry, index));
-}
-
-function loadEntries() {
-  renderTable();
 }
 
 function saveEntries(entries) {
@@ -80,9 +75,11 @@ form.addEventListener('submit', function(e) {
 });
 
 tableBody.addEventListener('click', function(e) {
+  const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
+
+  // Edit button
   if (e.target.classList.contains('edit-btn')) {
     const index = parseInt(e.target.getAttribute('data-index'));
-    const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
     const entry = entries[index];
 
     // Populate form
@@ -98,6 +95,23 @@ tableBody.addEventListener('click', function(e) {
     editIndex = index;
     submitBtn.textContent = "Update Entry";
   }
+
+  // Delete button
+  if (e.target.classList.contains('delete-btn')) {
+    const index = parseInt(e.target.getAttribute('data-index'));
+    if (confirm("Are you sure you want to delete this entry?")) {
+      entries.splice(index, 1);
+      saveEntries(entries);
+      renderTable();
+      // If you were editing the one being deleted
+      if (editIndex === index) {
+        form.reset();
+        submitBtn.textContent = "Add Entry";
+        editIndex = null;
+      }
+    }
+  }
 });
 
-loadEntries();
+renderTable();
+

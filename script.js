@@ -1,5 +1,10 @@
+// JS PART
+
 const form = document.getElementById('trackerForm');
 const tableBody = document.querySelector('#logTable tbody');
+const submitBtn = document.getElementById('submitBtn');
+
+let editIndex = null;
 
 function getStatus(e, m, t, target) {
   const total = e + m + t;
@@ -8,9 +13,8 @@ function getStatus(e, m, t, target) {
   return "Done";
 }
 
-function addEntryToTable(data) {
+function addEntryToTable(data, index) {
   const row = document.createElement('tr');
-
   const status = getStatus(data.easy, data.moderate, data.tough, data.target);
   row.classList.add(status.toLowerCase().replace(' ', ''));
 
@@ -24,20 +28,26 @@ function addEntryToTable(data) {
     <td>${data.mathQs}</td>
     <td>${data.target}</td>
     <td>${status}</td>
+    <td>
+      <button class="edit-btn" data-index="${index}">Edit</button>
+    </td>
   `;
 
   tableBody.appendChild(row);
 }
 
-function saveEntry(data) {
+function renderTable() {
+  tableBody.innerHTML = '';
   const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
-  entries.push(data);
-  localStorage.setItem('studyLog', JSON.stringify(entries));
+  entries.forEach((entry, index) => addEntryToTable(entry, index));
 }
 
 function loadEntries() {
-  const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
-  entries.forEach(addEntryToTable);
+  renderTable();
+}
+
+function saveEntries(entries) {
+  localStorage.setItem('studyLog', JSON.stringify(entries));
 }
 
 form.addEventListener('submit', function(e) {
@@ -54,9 +64,40 @@ form.addEventListener('submit', function(e) {
     target: parseInt(document.getElementById('target').value || 0)
   };
 
-  addEntryToTable(data);
-  saveEntry(data);
+  const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
+
+  if (editIndex !== null) {
+    entries[editIndex] = data;
+    editIndex = null;
+    submitBtn.textContent = "Add Entry";
+  } else {
+    entries.push(data);
+  }
+
+  saveEntries(entries);
+  renderTable();
   form.reset();
+});
+
+tableBody.addEventListener('click', function(e) {
+  if (e.target.classList.contains('edit-btn')) {
+    const index = parseInt(e.target.getAttribute('data-index'));
+    const entries = JSON.parse(localStorage.getItem('studyLog')) || [];
+    const entry = entries[index];
+
+    // Populate form
+    document.getElementById('date').value = entry.date;
+    document.getElementById('physics').value = entry.physics;
+    document.getElementById('easy').value = entry.easy;
+    document.getElementById('moderate').value = entry.moderate;
+    document.getElementById('tough').value = entry.tough;
+    document.getElementById('math').value = entry.math;
+    document.getElementById('mathQs').value = entry.mathQs;
+    document.getElementById('target').value = entry.target;
+
+    editIndex = index;
+    submitBtn.textContent = "Update Entry";
+  }
 });
 
 loadEntries();
